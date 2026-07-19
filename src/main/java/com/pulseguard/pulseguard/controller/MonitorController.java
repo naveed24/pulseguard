@@ -1,13 +1,11 @@
 package com.pulseguard.pulseguard.controller;
 
 
-import com.pulseguard.pulseguard.dto.MonitorCheckResponse;
-import com.pulseguard.pulseguard.dto.MonitorRequest;
-import com.pulseguard.pulseguard.dto.MonitorResponse;
-import com.pulseguard.pulseguard.dto.MonitorResultResponse;
+import com.pulseguard.pulseguard.dto.*;
 import com.pulseguard.pulseguard.service.MonitorCheckService;
 import com.pulseguard.pulseguard.service.MonitorHistoryService;
 import com.pulseguard.pulseguard.service.MonitorService;
+import com.pulseguard.pulseguard.service.MonitorStatisticsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,6 +24,8 @@ public class MonitorController {
     private final MonitorCheckService monitorCheckService;
 
     private final MonitorHistoryService monitorHistoryService;
+
+    private final MonitorStatisticsService monitorStatisticsService;
 
     @PostMapping
     public ResponseEntity<MonitorResponse> createMonitor(
@@ -90,6 +90,15 @@ public class MonitorController {
 
         return ResponseEntity.ok(
                 monitorHistoryService.getMonitorHistory(id)
+        );
+    }
+
+    @GetMapping("/{id}/statistics")
+    public ResponseEntity<MonitorStatisticsResponse> getStatistics(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                monitorStatisticsService.getStatistics(id)
         );
     }
 
