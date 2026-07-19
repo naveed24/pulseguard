@@ -1,8 +1,10 @@
 package com.pulseguard.pulseguard.controller;
 
 
+import com.pulseguard.pulseguard.dto.MonitorCheckResponse;
 import com.pulseguard.pulseguard.dto.MonitorRequest;
 import com.pulseguard.pulseguard.dto.MonitorResponse;
+import com.pulseguard.pulseguard.service.MonitorCheckService;
 import com.pulseguard.pulseguard.service.MonitorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,8 @@ import java.util.List;
 public class MonitorController {
 
     private final MonitorService monitorService;
+
+    private final MonitorCheckService monitorCheckService;
 
     @PostMapping
     public ResponseEntity<MonitorResponse> createMonitor(
@@ -65,6 +69,15 @@ public class MonitorController {
         monitorService.deleteMonitor(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/check")
+    public ResponseEntity<MonitorCheckResponse> checkMonitor(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                monitorCheckService.checkMonitor(id)
+        );
     }
 
 
