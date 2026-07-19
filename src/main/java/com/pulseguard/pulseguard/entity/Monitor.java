@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(
@@ -41,6 +43,13 @@ public class Monitor {
 
     @Column(name = "check_interval_seconds", nullable = false)
     private Integer checkIntervalSeconds;
+
+    @OneToMany(
+            mappedBy = "monitor",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<MonitorResult> results = new ArrayList<>();
 
     @Column(nullable = false)
     private Boolean active;

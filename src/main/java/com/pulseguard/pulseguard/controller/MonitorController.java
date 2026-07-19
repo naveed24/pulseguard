@@ -4,7 +4,9 @@ package com.pulseguard.pulseguard.controller;
 import com.pulseguard.pulseguard.dto.MonitorCheckResponse;
 import com.pulseguard.pulseguard.dto.MonitorRequest;
 import com.pulseguard.pulseguard.dto.MonitorResponse;
+import com.pulseguard.pulseguard.dto.MonitorResultResponse;
 import com.pulseguard.pulseguard.service.MonitorCheckService;
+import com.pulseguard.pulseguard.service.MonitorHistoryService;
 import com.pulseguard.pulseguard.service.MonitorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,8 @@ public class MonitorController {
     private final MonitorService monitorService;
 
     private final MonitorCheckService monitorCheckService;
+
+    private final MonitorHistoryService monitorHistoryService;
 
     @PostMapping
     public ResponseEntity<MonitorResponse> createMonitor(
@@ -77,6 +81,15 @@ public class MonitorController {
 
         return ResponseEntity.ok(
                 monitorCheckService.checkMonitor(id)
+        );
+    }
+
+    @GetMapping("/{id}/history")
+    public ResponseEntity<List<MonitorResultResponse>>
+    getMonitorHistory(@PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                monitorHistoryService.getMonitorHistory(id)
         );
     }
 

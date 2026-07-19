@@ -3,9 +3,12 @@ package com.pulseguard.pulseguard.service;
 
 import com.pulseguard.pulseguard.dto.MonitorCheckResponse;
 import com.pulseguard.pulseguard.entity.Monitor;
+import com.pulseguard.pulseguard.entity.MonitorResult;
 import com.pulseguard.pulseguard.enums.MonitorStatus;
 import com.pulseguard.pulseguard.exception.MonitorNotFoundException;
 import com.pulseguard.pulseguard.repository.MonitorRepository;
+import com.pulseguard.pulseguard.repository.MonitorResultRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,8 +27,12 @@ import java.time.LocalDateTime;
 public class MonitorCheckService {
 
     private final MonitorRepository monitorRepository;
+
+    private final MonitorResultRepository monitorResultRepository;
     private final HttpClient httpClient;
 
+
+    @Transactional
     public MonitorCheckResponse checkMonitor(Long monitorId) {
 
         Monitor monitor = monitorRepository
@@ -63,11 +70,12 @@ public class MonitorCheckService {
 
             LocalDateTime checkedAt = LocalDateTime.now();
 
-            updateMonitor(
+            saveCheckResult(
                     monitor,
                     status,
                     actualStatusCode,
                     responseTimeMs,
+                    null,
                     checkedAt
             );
 
@@ -118,11 +126,12 @@ public class MonitorCheckService {
         long responseTimeMs = calculateResponseTime(startTime);
         LocalDateTime checkedAt = LocalDateTime.now();
 
-        updateMonitor(
+        saveCheckResult(
                 monitor,
                 MonitorStatus.DOWN,
                 null,
                 responseTimeMs,
+                errorMessage,
                 checkedAt
         );
 
@@ -142,19 +151,35 @@ public class MonitorCheckService {
                 .build();
     }
 
-    private void updateMonitor(
+
+    private void saveCheckResult(
             Monitor monitor,
             MonitorStatus status,
-            Integer statusCode,
+            Integer actualStatusCode,
             Long responseTimeMs,
+            String errorMessage,
             LocalDateTime checkedAt) {
 
         monitor.setCurrentStatus(status);
-        monitor.setLastStatusCode(statusCode);
+        monitor.setLastStatusCode(actualStatusCode);
         monitor.setLastResponseTimeMs(responseTimeMs);
         monitor.setLastCheckedAt(checkedAt);
 
         monitorRepository.save(monitor);
+
+        MonitorResult result = new MonitorResult();
+
+        result.setMonitor(monitor);
+        result.setStatus(status);
+        result.setExpectedStatusCode(
+                monitor.getExpectedStatusCode()
+        );
+        result.setActualStatusCode(actualStatusCode);
+        result.setResponseTimeMs(responseTimeMs);
+        result.setErrorMessage(errorMessage);
+        result.setCheckedAt(checkedAt);
+
+        monitorResultRepository.save(result);
     }
 
     private long calculateResponseTime(long startTime) {
