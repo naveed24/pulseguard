@@ -44,6 +44,14 @@ pipeline {
                 bat 'mvnw.cmd -B package -DskipTests'
             }
         }
+        stage('Docker Check') {
+            steps {
+                echo 'Checking Docker availability'
+
+                bat 'docker version'
+                bat 'docker compose version'
+            }
+        }
     }
 
     post {
